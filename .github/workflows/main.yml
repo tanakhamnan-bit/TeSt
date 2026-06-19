@@ -27,35 +27,22 @@ jobs:
             <title>หน้าเว็บของฉัน</title>
             <style>
                 body {
-                    background-color: #282c34;
-                    color: #abb2bf;
-                    padding: 20px;
-                    font-family: 'Courier New', Courier, monospace;
-                    line-height: 1.6;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f2f5;
                 }
-                pre {
-                    background-color: #1e1e1e;
-                    padding: 15px;
-                    border-radius: 5px;
-                    white-space: pre-wrap;
-                    word-wrap: break-word;
+                h1 {
+                    font-size: 4rem;
+                    color: #1877f2;
                 }
             </style>
         </head>
         <body>
-            <pre>let
-    // 🔄 สเต็ปที่ 1: ตรวจสอบวันปัจจุบันของคอมพิวเตอร์ และคำนวณหาวันที่ของ "เมื่อวานนี้"
-    CurrentDateTime = DateTime.LocalNow(),
-    YesterdayDate = Date.AddDays(DateTime.Date(CurrentDateTime), -1),
-    
-    // แปลง ปี เดือน วัน ของเมื่อวานให้อยู่ในฟอร์แมต text (yyyy-MM-dd)
-    YearStr = Text.From(Date.Year(YesterdayDate)),
-    MonthStr = Text.PadStart(Text.From(Date.Month(YesterdayDate)), 2, "0"),
-    DayStr = Text.PadStart(Text.From(Date.Day(YesterdayDate)), 2, "0"),
-    DatePart = YearStr & "-" & MonthStr & "-" & DayStr,
-
-    // 🔗 สเต็ปที่ 2: ประกอบร่าง URL สำหรับดึงค่าฝนสะสมรายวันของเมื่อวาน (f=rf_sum)
-    DynamicURL = "http://122.155.135.51/api/map/climateContourGeo?t=period&y=" & YearStr & "&m=" & MonthStr & "&fd=" & DatePart & "&td=" & DatePart & "&f=rf_sum"</pre>
+            <h1>สวัสดี</h1>
         </body>
         </html>
         EOF
