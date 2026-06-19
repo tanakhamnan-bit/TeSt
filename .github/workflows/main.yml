@@ -1,16 +1,22 @@
-name: Test API
-
-on:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-
-    - name: Test API
-      run: |
-        curl -v \
-          -H "User-Agent: Mozilla/5.0" \
-          "http://122.155.135.51/api/map/climateContourGeo?t=period&y=2026&m=06&fd=2026-06-18&td=2026-06-18&f=rf_sum"
+function fetchDataFromGateway() {
+  // 🔗 ยิงเข้าหน้าเว็บ GitHub Pages ที่ทำหน้าที่เป็น Gateway พ่นข้อมูลดิบไว้แล้ว
+  var gatewayUrl = "https://tanakhamnan-bit.github.io/TeSt/";
+  
+  try {
+    var response = UrlFetchApp.fetch(gatewayUrl);
+    var jsonText = response.getContentText("UTF-8");
+    
+    // 📊 เปิดแผ่นงาน R_sum ของคุณ
+    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = spreadsheet.getSheetByName("R_sum");
+    if (!sheet) sheet = spreadsheet.getActiveSheet();
+    
+    // 🧹 เคลียร์หน้าเก่าแล้วพ่นข้อมูลดิบจาก Gateway ลงไปช่อง A1 ทั้งดุ้น
+    sheet.clearContents();
+    sheet.getRange("A1").setValue(jsonText);
+    
+    Logger.log("ดึงข้อมูลผ่าน Gateway สำเร็จเรียบร้อยแล้ว!");
+  } catch (error) {
+    Logger.log("เกิดข้อผิดพลาด: " + error.toString());
+  }
+}
