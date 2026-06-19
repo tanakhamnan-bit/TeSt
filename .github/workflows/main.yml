@@ -1,32 +1,3 @@
-name: Deploy API Response
-
-on:
-workflow_dispatch:
-
-jobs:
-build:
-runs-on: ubuntu-latest
-
-```
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-steps:
-
-  - name: Create Raw File
-    run: |
-      echo "TEST" > index.html
-
-  - name: Setup Pages
-    uses: actions/configure-pages@v4
-
-  - name: Upload Artifact
-    uses: actions/upload-pages-artifact@v3
-    with:
-      path: .
-
-  - name: Deploy to GitHub Pages
-    uses: actions/deploy-pages@v4
-```
+* name: Test API
+  run: |
+  curl -v "http://122.155.135.51/api/map/climateContourGeo?t=period&y=2026&m=06&fd=2026-06-18&td=2026-06-18&f=rf_sum"
