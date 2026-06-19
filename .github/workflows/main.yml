@@ -1,9 +1,7 @@
-name: Auto Fetch and Deploy Plain Text
+name: Deploy Hello Webpage
 
 on:
-  schedule:
-    - cron: '0 * * * *' # ⏰ รันอัตโนมัติทุกๆ 1 ชั่วโมง
-  workflow_dispatch: # 🔘 เปิดปุ่มกดรันมือได้
+  workflow_dispatch: # เปิดปุ่มกดรันมือได้
 
 jobs:
   build:
@@ -18,61 +16,36 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
+    - name: Create index.html
       run: |
-        python -m pip install --upgrade pip
-        pip install requests
-
-    - name: Run script and Generate Text
-      run: |
-        cat << 'EOF' > fetch_rain.py
-        import requests
-        from datetime import datetime, timedelta
-
-        def main():
-            yesterday = datetime.now() - timedelta(days=1)
-            year_str = yesterday.strftime("%Y")
-            month_str = yesterday.strftime("%m")
-            day_str = yesterday.strftime("%d")
-            date_part = f"{year_str}-{month_str}-{day_str}"
-            
-            dynamic_url = f"http://122.155.135.51/api/map/climateContourGeo?t=period&y={year_str}&m={month_str}&fd={date_part}&td={date_part}&f=rf_sum"
-            
-            try:
-                response = requests.get(dynamic_url, timeout=30)
-                data = response.json()
-                features = data.get("features", [])
-                
-                text_output = ""
-                for feat in features:
-                    props = feat.get("properties", {})
-                    site_id = props.get("site_id")
-                    site_name = props.get("site_name")
-                    rain = props.get("data") if props.get("data") is not None else 0.0
-                    
-                    if site_id is not None:
-                        # 🔤 แปลงเป็นข้อความ TEXT ดั้งเดิมแบบไม่มีหัวตาราง
-                        text_output += f"{site_id},{site_name},,,{rain}\n"
-                        
-                # 💾 เซฟครอบคลุมไว้ทั้ง 2 ชื่อไฟล์กันพลาด
-                with open("index.html", "w", encoding="utf-8") as f:
-                    f.write(text_output)
-                with open("rain_data.txt", "w", encoding="utf-8") as f:
-                    f.write(text_output)
-                    
-                print("สร้างไฟล์ข้อความสำเร็จ!")
-            except Exception as e:
-                print("เกิดข้อผิดพลาด:", str(e))
-
-        if __name__ == "__main__":
-            main()
+        cat << 'EOF' > index.html
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>หน้าเว็บของฉัน</title>
+            <style>
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f2f5;
+                }
+                h1 {
+                    font-size: 4rem;
+                    color: #1877f2;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>สวัสดี</h1>
+        </body>
+        </html>
         EOF
-        python fetch_rain.py
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -80,7 +53,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: '.' # ส่งไฟล์ขึ้นระบบเว็บ
+        path: '.'
 
     - name: Deploy to GitHub Pages
       uses: actions/deploy-pages@v4
