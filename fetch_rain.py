@@ -3,14 +3,14 @@ import requests
 from datetime import datetime, timedelta
 
 def main():
-    # 🔄 คำนวณหาวันที่ของ "เมื่อวานนี้" แบบ Dynamic
+    # 🔄 1. ตรวจสอบวันปัจจุบัน และคำนวณหาวันที่ของเมื่อวาน
     yesterday = datetime.now() - timedelta(days=1)
     year_str = yesterday.strftime("%Y")
     month_str = yesterday.strftime("%m")
     day_str = yesterday.strftime("%d")
     date_part = f"{year_str}-{month_str}-{day_str}"
     
-    # 🔗 ประกอบร่าง URL ดึงข้อมูลทั้งหมดใน Link
+    # 🔗 2. ประกอบร่าง URL สำหรับดึงข้อมูลจาก Server ต้นทาง
     dynamic_url = f"http://122.155.135.51/api/map/climateContourGeo?t=period&y={year_str}&m={month_str}&fd={date_part}&td={date_part}&f=rf_sum"
     
     try:
@@ -18,8 +18,8 @@ def main():
         data = response.json()
         features = data.get("features", [])
         
-        # 📋 กำหนดหัวตาราง (Header) วางที่แถวที่ 1 (A1) แปลงเป็น TEXT ทั้งหมด
-        output_data = [["site_id", "site_name", "amphoe", "province", "rf_sum"]]
+        # 📋 เตรียมตัวแปรเพื่อรวมข้อความ TEXT ดั้งเดิม (ไม่มีการเติมหัวตาราง และไม่เรียงลำดับใหม่)
+        text_output = ""
         
         for feat in features:
             props = feat.get("properties", {})
@@ -28,32 +28,17 @@ def main():
             rain = props.get("data") if props.get("data") is not None else 0.0
             
             if site_id is not None:
-                # 🔤 มั่นใจดึงและแปลงทุกฟิลด์ให้กลายเป็น TEXT (String) ก่อนส่งออก
-                row = [
-                    str(site_id), 
-                    str(site_name), 
-                    "", 
-                    "", 
-                    str(rain)
-                ]
-                output_data.append(row)
-        
-        #  Sorting ข้อมูลฝนตกจากมากไปน้อย (ยกเว้นแถวหัวตารางตัวแรก)
-        header = output_data[0]
-        rows = output_data[1:]
-        rows.sort(key=lambda x: float(x[4]), reverse=True)
-        final_output = [header] + rows
-        
-        # 🚀 ส่งก้อนข้อมูล TEXT ทั้งหมดไปที่ Google Sheets ของคุณ
-        google_script_url = os.environ.get("GG_SCRIPT_URL")
-        if google_script_url:
-            res = requests.post(google_script_url, json=final_output)
-            print("ผลการส่งข้อมูลไป Google Sheets:", res.text)
-        else:
-            print("Error: ไม่พบลิงก์ปลายทาง (GG_SCRIPT_URL)")
+                # 🔤 ดึงค่าและต่อข้อความเป็น TEXT รูปแบบเดิม: id,ชื่อ,,,ค่าฝน
+                text_output += f"{site_id},{site_name},,,{rain}\n"
+                
+        # 💾 บันทึกก้อนข้อความ Plain Text ทั้งหมดลงเป็นไฟล์ชื่อ rain_data.txt
+        with open("rain_data.txt", "w", encoding="utf-8") as f:
+            f.write(text_output)
+            
+        print("แปลงข้อมูลดิบเป็น TEXT ดั้งเดิมสำเร็จ!")
             
     except Exception as e:
-        print("เกิดข้อผิดพลาด:", str(e))
+        print("เกิดข้อผิดพลาดในการดึงข้อมูล:", str(e))
 
 if __name__ == "__main__":
     main()
