@@ -56,13 +56,16 @@ jobs:
                     rain = props.get("data") if props.get("data") is not None else 0.0
                     
                     if site_id is not None:
-                        # 🔤 แปลงเป็นโครงสร้าง TEXT ดั้งเดิมแบบที่คุณต้องการ (ไม่มีหัวตาราง)
+                        # 🔤 แปลงเป็นข้อความ TEXT ดั้งเดิมแบบไม่มีหัวตาราง
                         text_output += f"{site_id},{site_name},,,{rain}\n"
                         
-                # 💾 เซฟเป็นไฟล์ index.html เพื่อให้กดลิงก์ Pages แล้วเจอข้อความทันที
+                # 💾 เซฟครอบคลุมไว้ทั้ง 2 ชื่อไฟล์กันพลาด
                 with open("index.html", "w", encoding="utf-8") as f:
                     f.write(text_output)
-                print("สร้างไฟล์ข้อความดิบสำเร็จ!")
+                with open("rain_data.txt", "w", encoding="utf-8") as f:
+                    f.write(text_output)
+                    
+                print("สร้างไฟล์ข้อความสำเร็จ!")
             except Exception as e:
                 print("เกิดข้อผิดพลาด:", str(e))
 
@@ -77,7 +80,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: '.' # ส่งไฟล์ index.html ขึ้นระบบเว็บ
+        path: '.' # ส่งไฟล์ขึ้นระบบเว็บ
 
     - name: Deploy to GitHub Pages
       uses: actions/deploy-pages@v4
