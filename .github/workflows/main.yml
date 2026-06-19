@@ -9,8 +9,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    # เปิดสิทธิ์ให้บอทส่งไฟล์ขึ้นระบบสร้างหน้าเว็บ (GitHub Pages) โดยตรง
     permissions:
-      contents: write # เปิดสิทธิ์เขียนไฟล์ในระดับสคริปต์ด้วย
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
     - name: Check out repository
@@ -29,11 +32,15 @@ jobs:
     - name: Run script
       run: python fetch_rain.py
 
-    # 🚀 ดันไฟล์ TEXT กลับขึ้นคลังโค้ด GitHub หลังจากเราเปิดสิทธิ์ในขั้นตอนที่ 1 แล้ว
-    - name: Commit and Push TEXT file
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add rain_data.txt
-        git diff-index --quiet HEAD || git commit -m "Automated update rainfall TEXT data"
-        git push
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    # 📦 สเต็ปแพ็คไฟล์ TEXT ส่งขึ้นระบบสร้างหน้าเว็บ
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.' # ส่งไฟล์ทั้งหมดรวมถึง rain_data.txt ขึ้นระบบเว็บ
+        
+    # 🌐 สเต็ปสั่งเปิดหน้าเว็บสาธารณะทันที
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
