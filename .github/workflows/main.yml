@@ -1,7 +1,7 @@
 name: Deploy Code Text Webpage
 
 on:
-  workflow_dispatch: # 🔘 บรรทัดนี้จะทำให้ปุ่ม Run workflow สีเทากลับมาครับ
+  workflow_dispatch: # 🔘 เปิดปุ่มกดรันมือ
 
 jobs:
   build:
