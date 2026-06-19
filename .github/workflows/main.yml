@@ -1,72 +1,95 @@
-name: Deploy Hello Webpage
+name: Deploy Rain Data
 
 on:
-  workflow_dispatch: # 🔘 เปิดปุ่มกดรันมือได้
+workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
+build:
+runs-on: ubuntu-latest
 
-    steps:
-    - name: Check out repository
-      uses: actions/checkout@v4
+```
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-    - name: Create index.html
-      run: |
-        cat << 'EOF' > index.html
-        <!DOCTYPE html>
-        <html lang="th">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>หน้าเว็บของฉัน</title>
-            <style>
-                body {
-                    background-color: #282c34;
-                    color: #abb2bf;
-                    padding: 20px;
-                    font-family: 'Courier New', Courier, monospace;
-                    line-height: 1.6;
-                }
-                pre {
-                    background-color: #1e1e1e;
-                    padding: 15px;
-                    border-radius: 5px;
-                    white-space: pre-wrap;
-                    word-wrap: break-word;
-                }
-            </style>
-        </head>
-        <body>
-            <pre>let
-    // 🔄 สเต็ปที่ 1: ตรวจสอบวันปัจจุบันของคอมพิวเตอร์ และคำนวณหาวันที่ของ "เมื่อวานนี้"
-    CurrentDateTime = DateTime.LocalNow(),
-    YesterdayDate = Date.AddDays(DateTime.Date(CurrentDateTime), -1),
-    
-    // แปลง ปี เดือน วัน ของเมื่อวานให้อยู่ในฟอร์แมต text (yyyy-MM-dd)
-    YearStr = Text.From(Date.Year(YesterdayDate)),
-    MonthStr = Text.PadStart(Text.From(Date.Month(YesterdayDate)), 2, "0"),
-    DayStr = Text.PadStart(Text.From(Date.Day(YesterdayDate)), 2, "0"),
-    DatePart = YearStr &amp; "-" &amp; MonthStr &amp; "-" &amp; DayStr,
+steps:
+  - name: Check out repository
+    uses: actions/checkout@v4
 
-    // 🔗 สเต็ปที่ 2: ประกอบร่าง URL สำหรับดึงค่าฝนสะสมรายวันของเมื่อวาน (f=rf_sum)
-    DynamicURL = "http://122.155.135.51/api/map/climateContourGeo?t=period&amp;y=" &amp; YearStr &amp; "&amp;m=" &amp; MonthStr &amp; "&amp;fd=" &amp; DatePart &amp; "&amp;td=" &amp; DatePart &amp; "&amp;f=rf_sum"</pre>
-        </body>
-        </html>
-        EOF
+  - name: Download API Data
+    run: |
+      Y=$(date -d "yesterday" +%Y)
+      M=$(date -d "yesterday" +%m)
+      D=$(date -d "yesterday" +%Y-%m-%d)
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
+      URL="http://122.155.135.51/api/map/climateContourGeo?t=period&y=$Y&m=$M&fd=$D&td=$D&f=rf_sum"
 
-    - name: Upload Artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: '.'
+      echo "Downloading: $URL"
 
-    - name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v4
+      curl -L "$URL" -o data.json
+
+  - name: Create index.html
+    run: |
+      cat > index.html <<'EOF'
+      <!DOCTYPE html>
+      <html lang="th">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ข้อมูลฝนสะสมเมื่อวาน</title>
+
+        <style>
+          body{
+            font-family:Arial,sans-serif;
+            margin:20px;
+            background:#f5f5f5;
+          }
+
+          h1{
+            color:#1877f2;
+          }
+
+          pre{
+            background:white;
+            padding:15px;
+            border:1px solid #ddd;
+            border-radius:8px;
+            overflow:auto;
+            white-space:pre-wrap;
+          }
+        </style>
+      </head>
+      <body>
+
+        <h1>ข้อมูลฝนสะสมเมื่อวาน</h1>
+
+        <pre id="output">กำลังโหลดข้อมูล...</pre>
+
+        <script>
+          fetch('data.json')
+            .then(r => r.text())
+            .then(txt => {
+              document.getElementById('output').textContent = txt;
+            })
+            .catch(err => {
+              document.getElementById('output').textContent =
+                'ERROR: ' + err;
+            });
+        </script>
+
+      </body>
+      </html>
+      EOF
+
+  - name: Setup Pages
+    uses: actions/configure-pages@v4
+
+  - name: Upload Artifact
+    uses: actions/upload-pages-artifact@v3
+    with:
+      path: .
+
+  - name: Deploy to GitHub Pages
+    uses: actions/deploy-pages@v4
+```
