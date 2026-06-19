@@ -16,32 +16,32 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v4
 
-    - name: Fetch API Data and Create Gateway Page
+    - name: Create index.html
       run: |
-        # 🔄 สเต็ปที่ 1: คำนวณหาวันที่ของ "เมื่อวานนี้" ในระบบ Linux Actions
-        YEAR=$(date -d "yesterday" '+%Y')
-        MONTH=$(date -d "yesterday" '+%m')
-        DATE_PART=$(date -d "yesterday" '+%Y-%m-%d')
-        
-        # ประกอบร่าง URL ของเมื่อวานนี้แบบไดนามิก
-        API_URL="http://122.155.135.51/api/map/climateContourGeo?t=period&y=${YEAR}&m=${MONTH}&fd=${DATE_PART}&td=${DATE_PART}&f=rf_sum"
-        echo "กำลังดึงข้อมูลจาก: $API_URL"
-        
-        # 📥 สเต็ปที่ 2: ให้หุ่นยนต์ GitHub Actions ยิงไปดึงข้อมูลภายในทั้งหมดมาเซฟเป็นไฟล์ข้อความ
-        # (ใช้ -L เพื่อตาม Redirect และ --retry ป้องกันการหลุด)
-        curl -L --retry 3 "$API_URL" > raw_data.json
-        
-        # 🌐 สเต็ปที่ 3: สร้างหน้าเว็บ index.html พ่นข้อมูลดิบออกมาให้โชว์บนหน้าจอตรงๆ แบบ 100%
-        # โดยการอ่านข้อมูลจากไฟล์ raw_data.json ที่ดึงมาได้
-        cat raw_data.json > index.html
-
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-
-    - name: Upload Artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: '.'
-
-    - name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v4
+        cat << 'EOF' > index.html
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>หน้าเว็บของฉัน</title>
+            <style>
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f2f5;
+                }
+                h1 {
+                    font-size: 4rem;
+                    color: #1877f2;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>สวัสดี</h1>
+        </body>
+        </html>
