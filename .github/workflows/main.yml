@@ -18,34 +18,35 @@ jobs:
 
     - name: Create index.html
       run: |
-        cat << 'EOF' > index.html
-        <!DOCTYPE html>
-        <html lang="th">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>หน้าเว็บของฉัน</title>
-            <style>
-                body {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    margin: 0;
-                    font-family: Arial, sans-serif;
-                    background-color: #f0f2f5;
-                }
-                h1 {
-                    font-size: 4rem;
-                    color: #1877f2;
-                }
-            </style>
-        </head>
-        <body>
-            <h1>สวัสดี</h1>
-        </body>
-        </html>
-        EOF
+        echo '<!DOCTYPE html>' > index.html
+        echo '<html lang="th">' >> index.html
+        echo '<head>' >> index.html
+        echo '    <meta charset="UTF-8">' >> index.html
+        echo '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' >> index.html
+        echo '    <title>หน้าเว็บของฉัน</title>' >> index.html
+        echo '    <style>' >> index.html
+        echo '        body { background-color: #282c34; color: #abb2bf; padding: 20px; font-family: "Courier New", Courier, monospace; line-height: 1.6; }' >> index.html
+        echo '        pre { background-color: #1e1e1e; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }' >> index.html
+        echo '    </style>' >> index.html
+        echo '</head>' >> index.html
+        echo '<body>' >> index.html
+        echo '    <pre>' >> index.html
+        echo 'let' >> index.html
+        echo '    // 🔄 สเต็ปที่ 1: ตรวจสอบวันปัจจุบันของคอมพิวเตอร์ และคำนวณหาวันที่ของ "เมื่อวานนี้"' >> index.html
+        echo '    CurrentDateTime = DateTime.LocalNow(),' >> index.html
+        echo '    YesterdayDate = Date.AddDays(DateTime.Date(CurrentDateTime), -1),' >> index.html
+        echo '    ' >> index.html
+        echo '    // แปลง ปี เดือน วัน ของเมื่อวานให้อยู่ในฟอร์แมต text (yyyy-MM-dd)' >> index.html
+        echo '    YearStr = Text.From(Date.Year(YesterdayDate)),' >> index.html
+        echo '    MonthStr = Text.PadStart(Text.From(Date.Month(YesterdayDate)), 2, "0"),' >> index.html
+        echo '    DayStr = Text.PadStart(Text.From(Date.Day(YesterdayDate)), 2, "0"),' >> index.html
+        echo '    DatePart = YearStr & "-" & MonthStr & "-" & DayStr,' >> index.html
+        echo '    ' >> index.html
+        echo '    // 🔗 สเต็ปที่ 2: ประกอบร่าง URL สำหรับดึงค่าฝนสะสมรายวันของเมื่อวาน (f=rf_sum)' >> index.html
+        echo '    DynamicURL = "http://122.155.135.51/api/map/climateContourGeo?t=period&y=" & YearStr & "&m=" & MonthStr & "&fd=" & DatePart & "&td=" & DatePart & "&f=rf_sum"' >> index.html
+        echo '    </pre>' >> index.html
+        echo '</body>' >> index.html
+        echo '</html>' >> index.html
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
