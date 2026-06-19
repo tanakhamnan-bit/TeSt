@@ -27,27 +27,18 @@ jobs:
             <title>หน้าเว็บของฉัน</title>
             <style>
                 body {
-                    display: flex;
-                    justify-content: flex-start;
-                    align-items: flex-start;
-                    min-height: 100vh;
-                    margin: 0;
-                    font-family: 'Courier New', Courier, monospace;
                     background-color: #282c34;
                     color: #abb2bf;
                     padding: 20px;
-                    box-sizing: border-box;
+                    font-family: 'Courier New', Courier, monospace;
+                    line-height: 1.6;
                 }
                 pre {
-                    font-size: 1.2rem;
-                    line-height: 1.6;
+                    background-color: #1e1e1e;
+                    padding: 15px;
+                    border-radius: 5px;
                     white-space: pre-wrap;
                     word-wrap: break-word;
-                    margin: 0;
-                    background-color: #1e1e1e;
-                    padding: 20px;
-                    border-radius: 8px;
-                    width: 100%;
                 }
             </style>
         </head>
