@@ -2,20 +2,23 @@ name: Auto Fetch Rainfall Data
 
 on:
   schedule:
-    # สั่งให้ทำงานทุกๆ 1 ชั่วโมง (บวกเวลาสากล UTC เพื่อให้รันในเวลาไทยเที่ยงตรง)
-    - cron: '0 * * * *'
-  workflow_dispatch: # ปุ่มกดให้รันมือเองได้ เผื่อขี้เกียจรอเวลารัน
+    - cron: '0 * * * *' # ⏰ ปลุกหุ่นยนต์มาทำงานทุกๆ 1 ชั่วโมง
+  workflow_dispatch: # 🔘 เปิดปุ่มกดรันมือเพื่อทดสอบเองได้
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # 🔑 เปิดสิทธิ์ให้บอทของ GitHub สามารถเขียนไฟล์ลงคลังโค้ดนี้ได้
+    permissions:
+      contents: write
 
     steps:
     - name: Check out repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
@@ -25,6 +28,13 @@ jobs:
         pip install requests
 
     - name: Run script
-      env:
-        GG_SCRIPT_URL: ${{ secrets.GG_SCRIPT_URL }}
       run: python fetch_rain.py
+
+    # 🚀 สั่งให้เอาไฟล์ rain_data.txt ที่สร้างได้ ดันกลับขึ้น GitHub อัตโนมัติ
+    - name: Commit and Push TEXT file
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add rain_data.txt
+        git diff-index --quiet HEAD || git commit -m "Automated update rainfall TEXT data"
+        git push
