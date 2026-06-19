@@ -2,16 +2,15 @@ name: Auto Fetch Rainfall Data
 
 on:
   schedule:
-    - cron: '0 * * * *' # ⏰ ปลุกหุ่นยนต์มาทำงานทุกๆ 1 ชั่วโมง
-  workflow_dispatch: # 🔘 เปิดปุ่มกดรันมือเพื่อทดสอบเองได้
+    - cron: '0 * * * *' # ⏰ รันอัตโนมัติทุกๆ 1 ชั่วโมง
+  workflow_dispatch: # 🔘 เปิดปุ่มกดรันมือได้
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
-    # 🔑 เปิดสิทธิ์ให้บอทของ GitHub สามารถเขียนไฟล์ลงคลังโค้ดนี้ได้
     permissions:
-      contents: write
+      contents: write # เปิดสิทธิ์เขียนไฟล์ในระดับสคริปต์ด้วย
 
     steps:
     - name: Check out repository
@@ -30,7 +29,7 @@ jobs:
     - name: Run script
       run: python fetch_rain.py
 
-    # 🚀 สั่งให้เอาไฟล์ rain_data.txt ที่สร้างได้ ดันกลับขึ้น GitHub อัตโนมัติ
+    # 🚀 ดันไฟล์ TEXT กลับขึ้นคลังโค้ด GitHub หลังจากเราเปิดสิทธิ์ในขั้นตอนที่ 1 แล้ว
     - name: Commit and Push TEXT file
       run: |
         git config --global user.name "github-actions[bot]"
