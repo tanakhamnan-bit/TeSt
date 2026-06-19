@@ -24,24 +24,50 @@ jobs:
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>หน้าเว็บของฉัน</title>
+            <title>Dynamic URL Generator</title>
             <style>
                 body {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
                     margin: 0;
-                    font-family: Arial, sans-serif;
-                    background-color: #f0f2f5;
-                }
-                h1 {
-                    font-size: 4rem;
-                    color: #1877f2;
+                    padding: 20px;
+                    font-family: monospace;
+                    background-color: #ffffff;
+                    color: #000000;
+                    word-break: break-all;
                 }
             </style>
         </head>
         <body>
-            <h1>สวัสดี</h1>
+            <div id="target-url">กำลังคำนวณลิงก์...</div>
+
+            <script>
+                // 🔄 สเต็ปที่ 1: ตรวจสอบวันปัจจุบันของคอมพิวเตอร์ และคำนวณหาวันที่ของ "เมื่อวานนี้"
+                const currentDateTime = new Date();
+                const yesterdayDate = new Date(currentDateTime);
+                yesterdayDate.setDate(currentDateTime.getDate() - 1);
+                
+                // แปลง ปี เดือน วัน ของเมื่อวานให้อยู่ในฟอร์แมต text (yyyy-MM-dd)
+                const yearStr = yesterdayDate.getFullYear().toString();
+                const monthStr = (yesterdayDate.getMonth() + 1).toString().padStart(2, '0');
+                const dayStr = yesterdayDate.getDate().toString().padStart(2, '0');
+                const datePart = `${yearStr}-${monthStr}-${dayStr}`;
+
+                // 🔗 สเต็ปที่ 2: ประกอบร่าง URL สำหรับดึงค่าฝนสะสมรายวันของเมื่อวาน (f=rf_sum)
+                const dynamicURL = `http://122.155.135.51/api/map/climateContourGeo?t=period&y=${yearStr}&m=${monthStr}&fd=${datePart}&td=${datePart}&f=rf_sum`;
+                
+                // พ่นเฉพาะข้อความลิงก์ออกสู่หน้าจอหน้าเว็บตรงๆ เพื่อให้ GAS มาดึงง่าย
+                document.getElementById('target-url').innerText = dynamicURL;
+            </script>
         </body>
         </html>
+        EOF
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
