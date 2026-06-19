@@ -1,59 +1,90 @@
-name: Deploy Hello Webpage
+- name: Create index.html
+  run: |
+    cat << 'EOF' > index.html
+    <!DOCTYPE html>
+    <html lang="th">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>ข้อมูลฝนสะสมเมื่อวาน</title>
 
-on:
-  workflow_dispatch: # เปิดปุ่มกดรันมือได้
+      <style>
+        body{
+          font-family: Arial, sans-serif;
+          margin:20px;
+          background:#f5f5f5;
+        }
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
+        h1{
+          color:#1877f2;
+        }
 
-    steps:
-    - name: Check out repository
-      uses: actions/checkout@v4
+        pre{
+          background:white;
+          padding:15px;
+          border-radius:8px;
+          overflow:auto;
+          border:1px solid #ddd;
+        }
+      </style>
+    </head>
 
-    - name: Create index.html
-      run: |
-        cat << 'EOF' > index.html
-        <!DOCTYPE html>
-        <html lang="th">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>หน้าเว็บของฉัน</title>
-            <style>
-                body {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    margin: 0;
-                    font-family: Arial, sans-serif;
-                    background-color: #f0f2f5;
-                }
-                h1 {
-                    font-size: 4rem;
-                    color: #1877f2;
-                }
-            </style>
-        </head>
-        <body>
-            <h1>สวัสดี</h1>
-        </body>
-        </html>
-        EOF
+    <body>
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
+      <h1>ข้อมูลฝนสะสมเมื่อวาน</h1>
 
-    - name: Upload Artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: '.'
+      <div id="url"></div>
+      <pre id="result">กำลังโหลด...</pre>
 
-    - name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v4
+      <script>
+
+      // วันที่ปัจจุบัน
+      const now = new Date();
+
+      // เมื่อวาน
+      const yesterday = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - 1
+      );
+
+      const yyyy = yesterday.getFullYear();
+
+      const mm = String(
+        yesterday.getMonth() + 1
+      ).padStart(2,'0');
+
+      const dd = String(
+        yesterday.getDate()
+      ).padStart(2,'0');
+
+      const datePart = `${yyyy}-${mm}-${dd}`;
+
+      const apiUrl =
+        `http://122.155.135.51/api/map/climateContourGeo` +
+        `?t=period` +
+        `&y=${yyyy}` +
+        `&m=${mm}` +
+        `&fd=${datePart}` +
+        `&td=${datePart}` +
+        `&f=rf_sum`;
+
+      document.getElementById("url").innerHTML =
+        `<b>URL:</b> ${apiUrl}`;
+
+      fetch(apiUrl)
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById("result").textContent =
+            JSON.stringify(data, null, 2);
+        })
+        .catch(err => {
+          document.getElementById("result").textContent =
+            "ERROR : " + err;
+        });
+
+      </script>
+
+    </body>
+    </html>
+    EOF
