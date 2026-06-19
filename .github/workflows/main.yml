@@ -1,4 +1,4 @@
-name: Auto Fetch Rainfall Data
+name: Auto Fetch and Deploy Plain Text
 
 on:
   schedule:
@@ -8,6 +8,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
     - name: Check out repository
@@ -23,7 +28,56 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
-    - name: Run script
-      env:
-        GG_SCRIPT_URL: ${{ secrets.GG_SCRIPT_URL }}
-      run: python fetch_rain.py
+    - name: Run script and Generate Text
+      run: |
+        cat << 'EOF' > fetch_rain.py
+        import requests
+        from datetime import datetime, timedelta
+
+        def main():
+            yesterday = datetime.now() - timedelta(days=1)
+            year_str = yesterday.strftime("%Y")
+            month_str = yesterday.strftime("%m")
+            day_str = yesterday.strftime("%d")
+            date_part = f"{year_str}-{month_str}-{day_str}"
+            
+            dynamic_url = f"http://122.155.135.51/api/map/climateContourGeo?t=period&y={year_str}&m={month_str}&fd={date_part}&td={date_part}&f=rf_sum"
+            
+            try:
+                response = requests.get(dynamic_url, timeout=30)
+                data = response.json()
+                features = data.get("features", [])
+                
+                text_output = ""
+                for feat in features:
+                    props = feat.get("properties", {})
+                    site_id = props.get("site_id")
+                    site_name = props.get("site_name")
+                    rain = props.get("data") if props.get("data") is not None else 0.0
+                    
+                    if site_id is not None:
+                        # 🔤 แปลงเป็นโครงสร้าง TEXT ดั้งเดิมแบบที่คุณต้องการ (ไม่มีหัวตาราง)
+                        text_output += f"{site_id},{site_name},,,{rain}\n"
+                        
+                # 💾 เซฟเป็นไฟล์ index.html เพื่อให้กดลิงก์ Pages แล้วเจอข้อความทันที
+                with open("index.html", "w", encoding="utf-8") as f:
+                    f.write(text_output)
+                print("สร้างไฟล์ข้อความดิบสำเร็จ!")
+            except Exception as e:
+                print("เกิดข้อผิดพลาด:", str(e))
+
+        if __name__ == "__main__":
+            main()
+        EOF
+        python fetch_rain.py
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.' # ส่งไฟล์ index.html ขึ้นระบบเว็บ
+
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
