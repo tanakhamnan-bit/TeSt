@@ -1,3 +1,59 @@
-* name: Test API
-  run: |
-  curl -v "http://122.155.135.51/api/map/climateContourGeo?t=period&y=2026&m=06&fd=2026-06-18&td=2026-06-18&f=rf_sum"
+name: Deploy Hello Webpage
+
+on:
+  workflow_dispatch: # เปิดปุ่มกดรันมือได้
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Create index.html
+      run: |
+        cat << 'EOF' > index.html
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>หน้าเว็บของฉัน</title>
+            <style>
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f2f5;
+                }
+                h1 {
+                    font-size: 4rem;
+                    color: #1877f2;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>สวัสดี</h1>
+        </body>
+        </html>
+        EOF
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
