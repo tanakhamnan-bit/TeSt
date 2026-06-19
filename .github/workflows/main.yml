@@ -1,22 +1,47 @@
-function fetchDataFromGateway() {
-  // 🔗 ยิงเข้าหน้าเว็บ GitHub Pages ที่ทำหน้าที่เป็น Gateway พ่นข้อมูลดิบไว้แล้ว
-  var gatewayUrl = "https://tanakhamnan-bit.github.io/TeSt/";
-  
-  try {
-    var response = UrlFetchApp.fetch(gatewayUrl);
-    var jsonText = response.getContentText("UTF-8");
+name: Deploy Hello Webpage
+
+on:
+  workflow_dispatch: # เปิดปุ่มกดรันมือได้
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
     
-    // 📊 เปิดแผ่นงาน R_sum ของคุณ
-    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = spreadsheet.getSheetByName("R_sum");
-    if (!sheet) sheet = spreadsheet.getActiveSheet();
-    
-    // 🧹 เคลียร์หน้าเก่าแล้วพ่นข้อมูลดิบจาก Gateway ลงไปช่อง A1 ทั้งดุ้น
-    sheet.clearContents();
-    sheet.getRange("A1").setValue(jsonText);
-    
-    Logger.log("ดึงข้อมูลผ่าน Gateway สำเร็จเรียบร้อยแล้ว!");
-  } catch (error) {
-    Logger.log("เกิดข้อผิดพลาด: " + error.toString());
-  }
-}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Fetch API Data and Create Gateway Page
+      run: |
+        # 🔄 สเต็ปที่ 1: คำนวณหาวันที่ของ "เมื่อวานนี้" ในระบบ Linux Actions
+        YEAR=$(date -d "yesterday" '+%Y')
+        MONTH=$(date -d "yesterday" '+%m')
+        DATE_PART=$(date -d "yesterday" '+%Y-%m-%d')
+        
+        # ประกอบร่าง URL ของเมื่อวานนี้แบบไดนามิก
+        API_URL="http://122.155.135.51/api/map/climateContourGeo?t=period&y=${YEAR}&m=${MONTH}&fd=${DATE_PART}&td=${DATE_PART}&f=rf_sum"
+        echo "กำลังดึงข้อมูลจาก: $API_URL"
+        
+        # 📥 สเต็ปที่ 2: ให้หุ่นยนต์ GitHub Actions ยิงไปดึงข้อมูลภายในทั้งหมดมาเซฟเป็นไฟล์ข้อความ
+        # (ใช้ -L เพื่อตาม Redirect และ --retry ป้องกันการหลุด)
+        curl -L --retry 3 "$API_URL" > raw_data.json
+        
+        # 🌐 สเต็ปที่ 3: สร้างหน้าเว็บ index.html พ่นข้อมูลดิบออกมาให้โชว์บนหน้าจอตรงๆ แบบ 100%
+        # โดยการอ่านข้อมูลจากไฟล์ raw_data.json ที่ดึงมาได้
+        cat raw_data.json > index.html
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
