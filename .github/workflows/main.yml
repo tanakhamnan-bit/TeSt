@@ -16,37 +16,51 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v4
 
-    - name: Create index.html
+    - name: Create Webpage Files
       run: |
-        echo '<!DOCTYPE html>' > index.html
-        echo '<html lang="th">' >> index.html
-        echo '<head>' >> index.html
-        echo '    <meta charset="UTF-8">' >> index.html
-        echo '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' >> index.html
-        echo '    <title>หน้าเว็บของฉัน</title>' >> index.html
-        echo '    <style>' >> index.html
-        echo '        body { background-color: #282c34; color: #abb2bf; padding: 20px; font-family: "Courier New", Courier, monospace; line-height: 1.6; }' >> index.html
-        echo '        pre { background-color: #1e1e1e; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }' >> index.html
-        echo '    </style>' >> index.html
-        echo '</head>' >> index.html
-        echo '<body>' >> index.html
-        echo '    <pre>' >> index.html
-        echo 'let' >> index.html
-        echo '    // 🔄 สเต็ปที่ 1: ตรวจสอบวันปัจจุบันของคอมพิวเตอร์ และคำนวณหาวันที่ของ "เมื่อวานนี้"' >> index.html
-        echo '    CurrentDateTime = DateTime.LocalNow(),' >> index.html
-        echo '    YesterdayDate = Date.AddDays(DateTime.Date(CurrentDateTime), -1),' >> index.html
-        echo '    ' >> index.html
-        echo '    // แปลง ปี เดือน วัน ของเมื่อวานให้อยู่ในฟอร์แมต text (yyyy-MM-dd)' >> index.html
-        echo '    YearStr = Text.From(Date.Year(YesterdayDate)),' >> index.html
-        echo '    MonthStr = Text.PadStart(Text.From(Date.Month(YesterdayDate)), 2, "0"),' >> index.html
-        echo '    DayStr = Text.PadStart(Text.From(Date.Day(YesterdayDate)), 2, "0"),' >> index.html
-        echo '    DatePart = YearStr & "-" & MonthStr & "-" & DayStr,' >> index.html
-        echo '    ' >> index.html
-        echo '    // 🔗 สเต็ปที่ 2: ประกอบร่าง URL สำหรับดึงค่าฝนสะสมรายวันของเมื่อวาน (f=rf_sum)' >> index.html
-        echo '    DynamicURL = "http://122.155.135.51/api/map/climateContourGeo?t=period&y=" & YearStr & "&m=" & MonthStr & "&fd=" & DatePart & "&td=" & DatePart & "&f=rf_sum"' >> index.html
-        echo '    </pre>' >> index.html
-        echo '</body>' >> index.html
-        echo '</html>' >> index.html
+        # 📄 1. สร้างไฟล์ข้อความดั้งเดิมเพื่อเก็บโค้ดสูตร (วิธีนี้ปลอดภัยที่สุด สัญลักษณ์ไม่เพี้ยน)
+        cat << 'EOF' > formula.txt
+        let
+            // 🔄 สเต็ปที่ 1: ตรวจสอบวันปัจจุบันของคอมพิวเตอร์ และคำนวณหาวันที่ของ "เมื่อวานนี้"
+            CurrentDateTime = DateTime.LocalNow(),
+            YesterdayDate = Date.AddDays(DateTime.Date(CurrentDateTime), -1),
+            
+            // แปลง ปี เดือน วัน ของเมื่อวานให้อยู่ในฟอร์แมต text (yyyy-MM-dd)
+            YearStr = Text.From(Date.Year(YesterdayDate)),
+            MonthStr = Text.PadStart(Text.From(Date.Month(YesterdayDate)), 2, "0"),
+            DayStr = Text.PadStart(Text.From(Date.Day(YesterdayDate)), 2, "0"),
+            DatePart = YearStr & "-" & MonthStr & "-" & DayStr,
+
+            // 🔗 สเต็ปที่ 2: ประกอบร่าง URL สำหรับดึงค่าฝนสะสมรายวันของเมื่อวาน (f=rf_sum)
+            DynamicURL = "http://122.155.135.51/api/map/climateContourGeo?t=period&y=" & YearStr & "&m=" & MonthStr & "&fd=" & DatePart & "&td=" & DatePart & "&f=rf_sum"
+        EOF
+
+        # 🌐 2. สร้างหน้าเว็บ index.html ให้ไปดึงข้อความจากไฟล์ด้านบนมาโชว์อีกทีเพื่อความสวยงาม
+        cat << 'EOF' > index.html
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>หน้าเว็บของฉัน</title>
+            <style>
+                body { background-color: #282c34; color: #abb2bf; padding: 20px; font-family: 'Courier New', Courier, monospace; line-height: 1.6; }
+                pre { background-color: #1e1e1e; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }
+            </style>
+        </head>
+        <body>
+            <pre id="code-content">กำลังโหลดข้อความสูตร...</pre>
+            <script>
+                // ดึงข้อความจากไฟล์ formula.txt มาแสดงตรงๆ เพื่อเลี่ยงปัญหาอักขระพิเศษพัง
+                fetch('formula.txt')
+                    .then(response => response.text())
+                    .then(text => {
+                        document.getElementById('code-content').textContent = text;
+                    });
+            </script>
+        </body>
+        </html>
+        EOF
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
