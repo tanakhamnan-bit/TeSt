@@ -1,4 +1,4 @@
-name: Deploy Rain Data
+name: Deploy API Response
 
 on:
 workflow_dispatch:
@@ -14,10 +14,7 @@ permissions:
   id-token: write
 
 steps:
-  - name: Check out repository
-    uses: actions/checkout@v4
-
-  - name: Download API Data
+  - name: Download API Response
     run: |
       Y=$(date -d "yesterday" +%Y)
       M=$(date -d "yesterday" +%m)
@@ -25,62 +22,7 @@ steps:
 
       URL="http://122.155.135.51/api/map/climateContourGeo?t=period&y=$Y&m=$M&fd=$D&td=$D&f=rf_sum"
 
-      echo "Downloading: $URL"
-
-      curl -L "$URL" -o data.json
-
-  - name: Create index.html
-    run: |
-      cat > index.html <<'EOF'
-      <!DOCTYPE html>
-      <html lang="th">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ข้อมูลฝนสะสมเมื่อวาน</title>
-
-        <style>
-          body{
-            font-family:Arial,sans-serif;
-            margin:20px;
-            background:#f5f5f5;
-          }
-
-          h1{
-            color:#1877f2;
-          }
-
-          pre{
-            background:white;
-            padding:15px;
-            border:1px solid #ddd;
-            border-radius:8px;
-            overflow:auto;
-            white-space:pre-wrap;
-          }
-        </style>
-      </head>
-      <body>
-
-        <h1>ข้อมูลฝนสะสมเมื่อวาน</h1>
-
-        <pre id="output">กำลังโหลดข้อมูล...</pre>
-
-        <script>
-          fetch('data.json')
-            .then(r => r.text())
-            .then(txt => {
-              document.getElementById('output').textContent = txt;
-            })
-            .catch(err => {
-              document.getElementById('output').textContent =
-                'ERROR: ' + err;
-            });
-        </script>
-
-      </body>
-      </html>
-      EOF
+      curl -L "$URL" -o index.html
 
   - name: Setup Pages
     uses: actions/configure-pages@v4
